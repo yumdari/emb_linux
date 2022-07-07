@@ -11,7 +11,7 @@ module_param(twostring ,charp, 0);
 
 static int hello_init(void)
 {
-	printk("Hello, world [onevalue=%d:twostring=%s\n",onevalue,twostring);
+	printk(KERN_ALERT,"Hello, world [onevalue=%d:twostring=%s\n",onevalue,twostring);
 	return 0;
 }
 static void hello_exit(void)
