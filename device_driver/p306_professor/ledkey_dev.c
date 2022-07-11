@@ -143,19 +143,19 @@ static ssize_t ledkey_write (struct file *filp, const char *buf, size_t count, l
 static long ledkey_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
 {
 
-	ioctl_test_info ctrl_info = {0,{0}};	// size : 0, buffer 128 bit를 0으로 초기화
+	ioctl_test_info ctrl_info = {0,{0}};
 	int err, size;
-	if( _IOC_TYPE( cmd ) != IOCTLTEST_MAGIC ) return -EINVAL; // IOCTLTEST_MAGIC = 5 in .h
-	if( _IOC_NR( cmd ) >= IOCTLTEST_MAXNR ) return -EINVAL;	// _IOC_NR = 0;(INIT)
+	if( _IOC_TYPE( cmd ) != IOCTLTEST_MAGIC ) return -EINVAL;
+	if( _IOC_NR( cmd ) >= IOCTLTEST_MAXNR ) return -EINVAL;
 
 	size = _IOC_SIZE( cmd );
 	if( size )
 	{
 		err = 0;
 		if( _IOC_DIR( cmd ) & _IOC_READ )
-			err = access_ok( VERIFY_WRITE, (void *) arg, size );	//커널이 쓰기 접근 가능한 영역인지 체크
+			err = access_ok( VERIFY_WRITE, (void *) arg, size );
 		else if( _IOC_DIR( cmd ) & _IOC_WRITE )
-			err = access_ok( VERIFY_READ , (void *) arg, size );	//커널이 일기  접근  가능한 영역인지 체크
+			err = access_ok( VERIFY_READ , (void *) arg, size );
 		if( !err ) return err;
 	}
 	switch( cmd )
@@ -175,12 +175,10 @@ static long ledkey_ioctl (struct file *filp, unsigned int cmd, unsigned long arg
 			led_write(15);
 			break;
 		case IOCTLTEST_WRITE :
-			err=copy_from_user((void*)&ctrl_info,(void*)arg,sizeof(ctrl_info));
+			err=copy_from_user((void *)&ctrl_info,(void *)arg,sizeof(ctrl_info));
 			led_write(ctrl_info.buff[0]);
-		case IOCTLTEST_READ :
+			break;
 
-		case IOCTLTEST_WRITE_READ :
-		case IOCTLTEST_GETSTATE :
 		default:
 			break;
 	}	

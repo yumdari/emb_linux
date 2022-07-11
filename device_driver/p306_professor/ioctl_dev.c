@@ -143,23 +143,24 @@ static ssize_t ledkey_write (struct file *filp, const char *buf, size_t count, l
 static long ledkey_ioctl (struct file *filp, unsigned int cmd, unsigned long arg)
 {
 
-	ioctl_test_info ctrl_info = {0,{0}};	// size : 0, buffer 128 bit를 0으로 초기화
+	ioctl_test_info ctrl_info = {0,{0}};
 	int err, size;
-	if( _IOC_TYPE( cmd ) != IOCTLTEST_MAGIC ) return -EINVAL; // IOCTLTEST_MAGIC = 5 in .h
-	if( _IOC_NR( cmd ) >= IOCTLTEST_MAXNR ) return -EINVAL;	// _IOC_NR = 0;(INIT)
+	if( _IOC_TYPE( cmd ) != IOCTLTEST_MAGIC ) return -EINVAL;
+	if( _IOC_NR( cmd ) >= IOCTLTEST_MAXNR ) return -EINVAL;
 
 	size = _IOC_SIZE( cmd );
 	if( size )
 	{
 		err = 0;
 		if( _IOC_DIR( cmd ) & _IOC_READ )
-			err = access_ok( VERIFY_WRITE, (void *) arg, size );	//커널이 쓰기 접근 가능한 영역인지 체크
+			err = access_ok( VERIFY_WRITE, (void *) arg, size );
 		else if( _IOC_DIR( cmd ) & _IOC_WRITE )
-			err = access_ok( VERIFY_READ , (void *) arg, size );	//커널이 일기  접근  가능한 영역인지 체크
+			err = access_ok( VERIFY_READ , (void *) arg, size );
 		if( !err ) return err;
 	}
 	switch( cmd )
 	{
+		char buf;
         case IOCTLTEST_KEYLEDINIT :
             key_init();
             led_init();
@@ -174,17 +175,39 @@ static long ledkey_ioctl (struct file *filp, unsigned int cmd, unsigned long arg
 		case IOCTLTEST_LEDON :
 			led_write(15);
 			break;
-		case IOCTLTEST_WRITE :
-			err=copy_from_user((void*)&ctrl_info,(void*)arg,sizeof(ctrl_info));
-			led_write(ctrl_info.buff[0]);
-		case IOCTLTEST_READ :
-
-		case IOCTLTEST_WRITE_READ :
 		case IOCTLTEST_GETSTATE :
+			key_read(&buf);
+			return buf;
+		case IOCTLTEST_READ :
+  			key_read(&(ctrl_info.buff[0]));
+			if(ctrl_info.buff[0] != 0)
+				ctrl_info.size=1;
+			err = copy_to_user((void *)arg,(const void *)&ctrl_info,(unsigned long)sizeof(ctrl_info));
+			break;
+
+		case IOCTLTEST_WRITE :
+			err = copy_from_user((void *)&ctrl_info,(void *)arg,(unsigned long)sizeof(ctrl_info));
+			if(ctrl_info.size == 1)
+				led_write(ctrl_info.buff[0]);
+			break;
+		case IOCTLTEST_WRITE_READ :
+			err = copy_from_user((void *)&ctrl_info,(void *)arg,(unsigned long)sizeof(ctrl_info));
+			if(ctrl_info.size == 1)
+				led_write(ctrl_info.buff[0]);
+
+  			key_read(&(ctrl_info.buff[0]));
+			if(ctrl_info.buff[0] != 0)
+				ctrl_info.size=1;
+			else
+				ctrl_info.size=0;
+
+			err = copy_to_user((void *)arg,(const void *)&ctrl_info,(unsigned long)sizeof(ctrl_info));
+			break;
 		default:
+			err =-E2BIG;
 			break;
 	}	
-	return 0;
+	return err;
 }
 
 static int ledkey_release (struct inode *inode, struct file *filp)
