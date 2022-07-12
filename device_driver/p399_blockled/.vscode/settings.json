@@ -1,0 +1,8 @@
+{
+    "makefile.extensionOutputFolder": "./.vscode",
+    "files.associations": {
+        "gpio.h": "c",
+        "fs.h": "c",
+        "stdio.h": "c"
+    }
+}
