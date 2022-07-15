@@ -1,0 +1,2 @@
+/home/ubuntu/udoo_linux_bsp/drivers/p527_ledkey_proc/ledkey_proc_dev.ko
+/home/ubuntu/udoo_linux_bsp/drivers/p527_ledkey_proc/ledkey_proc_dev.o
