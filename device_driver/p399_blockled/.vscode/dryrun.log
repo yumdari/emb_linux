@@ -1,0 +1,13 @@
+make --dry-run --keep-going --print-directory
+make: Entering directory '/home/ubuntu/udoo_linux_bsp/drivers/p399_blockled'
+ 
+arm-linux-gnueabihf-gcc -o ledkey_app_block ledkey_app_block.c
+ 
+cp ledkey_app_block /srv/nfs
+ 
+make -C /home/ubuntu/udoo_linux_bsp/kernel/3.14.1 SUBDIRS=/home/ubuntu/udoo_linux_bsp/drivers/p399_blockled modules ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf-
+ 
+cp ledkey_dev_block.ko /srv/nfs
+ 
+make: Leaving directory '/home/ubuntu/udoo_linux_bsp/drivers/p399_blockled'
+ 
